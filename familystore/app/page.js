@@ -1,22 +1,37 @@
-import Image from "next/image";
-import Head from "next/head";
+import Products from './components/ProductCard'
+import { fetchProducts } from './api'
+
+/**
+ * 
+  * @param {Object} props 
+ * @param {Object} props.searchParams 
+ * @param {string} [props.searchParams.page] 
+ * @returns {JSX.Element}
+ */
+
+export default async function Home({ searchParams }) {
+  const page = Number(searchParams.page) || 1;
+  let products;
+  let error;
+
+  try {
+    products = await fetchProducts(page);
+  } catch (err) {
+    error = err.message;
+  }
+  
+  if (error) {
+    return <div className="text-red-500 text-center p-4">Error: {error}</div>;
+  }
 
 
-
-export default function Home() {
   return (
-    
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Head>
-        <link rel="icon"  href="app/assets/favicon/ico" />
-          <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
-          <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
-          <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/>
-          <link rel="manifest" href="/site.webmanifest"/>
-        </Head>
-        <h1 className="text-4xl font-bold text-center sm:text-5xl">hello</h1>
-        </main>
+    <div>
+      <header className='py-12 font-serif bg-amber-100'>
+        <h1 className='text-3xl font-bold text-amber-800'>**Family Store**</h1>
+      </header>
+      <Products products={ products} currentPage ={page} />
     </div>
-  );
+  )
 }
+  
