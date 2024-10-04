@@ -1,4 +1,4 @@
-import { ProductDetail } from '../../components/productDetail';
+import { ProductDetail } from '../../components/ProductDetails.js';
 import { fetchProductById } from '../../firebaseFunctions';
 
 

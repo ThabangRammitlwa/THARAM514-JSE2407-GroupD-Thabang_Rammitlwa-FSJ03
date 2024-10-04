@@ -1,6 +1,6 @@
 // pages/api/categories.js
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from 'firebase';
+import { db } from "../../../firebaseConfig"
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -22,3 +22,4 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+

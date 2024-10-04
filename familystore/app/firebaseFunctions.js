@@ -37,5 +37,15 @@ export async function fetchProductById(id) {
   return { id: productSnapshot.id, ...productSnapshot.data() };
 }
 
+export async function fetchCategories() {
+  const productsCollection = collection(db, 'products');
+  const snapshot = await getDocs(productsCollection);
+  
+  const categories = new Set();
+  snapshot.docs.forEach(doc => {
+    categories.add(doc.data().category);
+  });
 
+  return Array.from(categories);
+}
 

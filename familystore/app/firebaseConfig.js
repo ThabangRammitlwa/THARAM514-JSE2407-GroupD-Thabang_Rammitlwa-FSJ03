@@ -44,7 +44,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app)
 
 //collection ref
-const colRef = collection(db,'products')
+const colRef = collection(db,'products,categories')
 
 //get collection data
 

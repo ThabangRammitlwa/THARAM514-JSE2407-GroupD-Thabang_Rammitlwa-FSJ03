@@ -2,82 +2,142 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { fetchProducts } from './firebaseFunctions';
-import Image from 'next/image';
-import Link from 'next/link';
+import { fetchProducts,fetchCategories } from './firebaseFunctions';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Header from './components/Header';
+import Filter from './components/Filter';
+import ProductCard from './components/ProductCard';
+import Pagination from './components/Pagination';
+import Footer from './components/Footer';
+
 
 export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+
+  const page = Number(searchParams.get('page')) || 1;
+  const search = searchParams.get('search') || '';
+  const category = searchParams.get('category') || '';
+  const sortBy = searchParams.get('sortBy') || '';
+  const sortOrder = searchParams.get('sortOrder') || '';
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
       try {
-        const fetchedProducts = await fetchProducts(); // This will now be an array
-        setProducts(fetchedProducts);
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
+        setLoading(true);
+        const [productsData, categoriesData] = await Promise.all([
+          fetchProducts({ page, search, category, sortBy, sortOrder }),
+          fetchCategories()
+        ]);
+        setProducts(productsData.products);
+        setTotalPages(productsData.totalPages);
+        setCurrentPage(page);
+        setTotalProducts(productsData.totalProducts);
+        setCategories(categoriesData);
+        setError(null);
+      } catch (e) {
+        setError(e.message);
       } finally {
-        setLoading(false); // Ensure loading is false even if there's an error
+        setLoading(false);
       }
-    };
+    }
+    loadData();
+  }, [category, page, sortBy, sortOrder, search]);
 
-    loadProducts();
-  }, []);
+  /**
+   * Updates the URL with new search parameters and navigates to the new URL.
+   * 
+   * @param {Object} newParams - The new parameters to update in the URL.
+   */
+  const updateUrl = (newParams) => {
+    const updatedSearchParams = new URLSearchParams(searchParams);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value) {
+        updatedSearchParams.set(key, value);
+      } else {
+        updatedSearchParams.delete(key);
+      }
+    });
+    router.push(`/?${updatedSearchParams.toString()}`);
+  };
 
-  if (loading) {
-    return <p>Loading...</p>;
+  /**
+   * Handles filtering of products based on the selected category.
+   * 
+   * @param {string} newCategory - The new category to filter products by.
+   */
+  const handleFilter = (newCategory) => updateUrl({ category: newCategory, page: 1 });
+
+  /**
+   * Handles sorting of products based on selected sorting options.
+   * 
+   * @param {string} newSortBy - The field to sort by.
+   * @param {string} newSortOrder - The order of sorting ('asc' or 'desc').
+   */
+  const handleSort = (newSortBy, newSortOrder) => updateUrl({ sortBy: newSortBy, sortOrder: newSortOrder, page: 1 });
+
+  /**
+   * Handles searching for products based on user input.
+   * 
+   * @param {string} newSearch - The new search query.
+   */
+  const handleSearch = (newSearch) => updateUrl({ search: newSearch, page: 1 });
+
+  /**
+   * Handles page changes for pagination.
+   * 
+   * @param {number} newPage - The new page number to navigate to.
+   */
+  const handlePageChange = (newPage) => updateUrl({ page: newPage });
+
+  /**
+   * Resets all filters and navigates back to the default home page.
+   */
+  const handleReset = () => router.push('/');
+
+  if (error) {
+    return <div className="text-red-600 text-center p-4 bg-red-100 rounded-lg">Error: {error}</div>;
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-10 bg-white">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {products && products.map((item, index) => (
-          <Link key={index} href={`/product/${item.id}?page={currentPage}`}>
-            <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-[300px] sm:h-[350px] md:h-[400px]">
-              <div className="p-4">
-                <h2 className="text-xl font-bold font-sans text-amber-900 mb-2">{item.title}</h2>
-                <div className="relative aspect-w-1 aspect-h-1 h-32 sm:h-40 md:h-48">
-                <Image 
-            src={item.images || item.thumbnail} 
-            alt={item.title} 
-            width={250}
-            height={250}
-            objectFit="cover"
+    <div>
+      <Header currentSearch={search} onSearch={handleSearch} />
+      <Filter
+        categories={categories}
+        currentCategory={category}
+        currentSortBy={sortBy}
+        currentSortOrder={sortOrder}
+        onFilter={handleFilter}
+        onSort={handleSort}
+        onReset={handleReset}
+      />
+      {loading ? (
+        <div className="text-center font-bold text-amber-800 p-8">Loading...</div>
+      ) : (
+        <>
+          <ProductCard products={products} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+           hasMore={products}
+            onPageChange={handlePageChange}
           />
-                  {item.thumbnail.length > 1 && (
-                    <div className="absolute inset-0 flex justify-between items-center px-2">
-                      <button
-                        onClick={(e) => changeImage(e, item.id, -1)}
-                        className="text-amber-900 bg-white bg-opacity-50 rounded-full p-1 hover:bg-opacity-75"
-                      >
-                        &lt;
-                      </button>
-
-                      <button
-                        onClick={(e) => changeImage(e, item.id, 1)}
-                        className="text-amber-900 bg-white bg-opacity-50 rounded-full p-1 hover:bg-opacity-75"
-                      >
-                        &gt;
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="p-4 bg-amber-50">
-                <p className="text-lg font-mono font-bold text-amber-900">R{item.price.toFixed(2)}</p>
-                <p className="inline-block bg-amber-100 rounded-full px-3 py-1 text-sm font-serif text-amber-800 mr-2 mb-2">
-                  {item.category}
-                </p>
-                <p className="text-sm text-gray-600">Rating: {item.rating.toFixed(2)}</p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+          <Footer />
+        </>
+      )}
     </div>
   );
 }
+
+
+
 
 
   
