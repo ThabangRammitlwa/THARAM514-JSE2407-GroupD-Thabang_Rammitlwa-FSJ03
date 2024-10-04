@@ -1,33 +1,19 @@
+
 // pages/api/products/index.js
-import { db } from '../../../firebase';
-import Fuse from 'fuse.js';
+import { fetchProducts } from '../../../firebaseFunctions';
 
-const productsPerPage = 20;
+export default async function handler(req, res) {
+  if (req.method === 'GET') {
+    const { page = 1, pageSize = 10, cursor } = req.query;
 
-const handler = async (req, res) => {
-  const { page = 1, search = '', category = '', sort = '' } = req.query;
-  let query = db.collection('products');
-
-  if (category) {
-    query = query.where('category', '==', category);
+    try {
+      const { products, lastVisible } = await fetchProducts(parseInt(page), parseInt(pageSize), cursor);
+      res.status(200).json({ products, cursor: lastVisible });
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching products' });
+    }
+  } else {
+    res.setHeader('Allow', ['GET']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-
-  const snapshot = await query.get();
-  let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-  if (search) {
-    const fuse = new Fuse(products, { keys: ['title'] });
-    products = fuse.search(search).map(result => result.item);
-  }
-
-  if (sort) {
-    products.sort((a, b) => (sort === 'asc' ? a.price - b.price : b.price - a.price));
-  }
-
-  const total = products.length;
-  const paginatedProducts = products.slice((page - 1) * productsPerPage, page * productsPerPage);
-
-  res.status(200).json({ total, products: paginatedProducts });
-};
-
-export default handler;
+}

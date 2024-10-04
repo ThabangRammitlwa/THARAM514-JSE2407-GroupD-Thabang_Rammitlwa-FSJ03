@@ -1,15 +1,21 @@
 // pages/api/products/[id].js
-import { db } from '../../../firebase';
+import { fetchProductById } from '../../../firebaseFunctions';
 
-const handler = async (req, res) => {
-  const { id } = req.query;
-  const doc = await db.collection('products').doc(id).get();
+export default async function handler(req, res) {
+  if (req.method === 'GET') {
+    const { id } = req.query;
 
-  if (!doc.exists) {
-    return res.status(404).json({ error: 'Product not found' });
+    try {
+      const product = await fetchProductById(id);
+      res.status(200).json(product);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching product' });
+    }
+  } else {
+    res.setHeader('Allow', ['GET']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
+}
 
-  res.status(200).json({ id: doc.id, ...doc.data() });
-};
 
-export default handler;
+
