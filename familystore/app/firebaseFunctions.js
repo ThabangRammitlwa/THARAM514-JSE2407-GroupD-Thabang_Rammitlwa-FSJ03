@@ -1,4 +1,3 @@
-// firebaseFunctions.js
 import { db } from './firebaseConfig';
 import { collection, query, getDocs, doc, getDoc, orderBy, limit, startAfter } from 'firebase/firestore';
 
@@ -15,15 +14,12 @@ export async function fetchProducts(page = 1, limitValue = 20, cursor = null) {
 
   const querySnapshot = await getDocs(q);
   const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  
-  // Optionally handle cases where no products are found
-  if (products.length === 0) {
-    console.warn("No products found.");
-  }
 
-  return products; // Return only the products array
+  return {
+    products,
+    lastVisible: querySnapshot.docs[querySnapshot.docs.length - 1]
+  };
 }
-
 
 // Fetch a single product by ID
 export async function fetchProductById(id) {
@@ -40,7 +36,7 @@ export async function fetchProductById(id) {
 export async function fetchCategories() {
   const productsCollection = collection(db, 'products');
   const snapshot = await getDocs(productsCollection);
-  
+
   const categories = new Set();
   snapshot.docs.forEach(doc => {
     categories.add(doc.data().category);
@@ -48,4 +44,5 @@ export async function fetchCategories() {
 
   return Array.from(categories);
 }
+
 
