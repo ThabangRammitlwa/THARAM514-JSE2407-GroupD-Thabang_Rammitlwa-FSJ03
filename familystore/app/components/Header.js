@@ -3,14 +3,17 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../useAuth';
-import { signIn,signOutUser } from '../authFunction';
+import { signIn, signOutUser, signUp } from '../authFunction'; // Import signUp function
 import { FaUser, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
-import SignInModal from './SingnInModal';
+import SignInModal from './SingnInModal'
+import SignUpModal from './SignUpModal' // Import the new SignUpModal component
 
 export default function Header({ currentSearch = '', onSearch }) {
   const [search, setSearch] = useState(currentSearch);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false); // State for sign-up modal
+
   const user = useAuth();
 
   useEffect(() => {
@@ -27,7 +30,7 @@ export default function Header({ currentSearch = '', onSearch }) {
   const handleSignIn = async (email, password) => {
     try {
       await signIn(email, password);
-      setIsModalOpen(false); // Close the modal on successful sign-in
+      setIsSignInModalOpen(false); // Close the modal on successful sign-in
     } catch (error) {
       console.error("Sign-in error:", error);
     }
@@ -38,6 +41,15 @@ export default function Header({ currentSearch = '', onSearch }) {
       await signOutUser();
     } catch (error) {
       console.error("Sign-out error:", error);
+    }
+  };
+
+  const handleSignUp = async (email, password) => {
+    try {
+      await signUp(email, password);
+      setIsSignUpModalOpen(false); // Close the modal on successful sign-up
+    } catch (error) {
+      console.error("Sign-up error:", error);
     }
   };
 
@@ -75,10 +87,15 @@ export default function Header({ currentSearch = '', onSearch }) {
               </button>
             </>
           ) : (
-            <button onClick={() => setIsModalOpen(true)} className="text-white flex items-center space-x-1">
-              <FaSignInAlt />
-              <span>Sign In</span>
-            </button>
+            <>
+              <button onClick={() => setIsSignInModalOpen(true)} className="text-white flex items-center space-x-1">
+                <FaSignInAlt />
+                <span>Sign In</span>
+              </button>
+              <button onClick={() => setIsSignUpModalOpen(true)} className="text-white flex items-center space-x-1">
+                <span>Sign Up</span>
+              </button>
+            </>
           )}
         </div>
         <form onSubmit={handleSearchSubmit} className="hidden sm:block">
@@ -104,9 +121,11 @@ export default function Header({ currentSearch = '', onSearch }) {
           <button type="submit" className="bg-amber-600 text-white p-2 rounded w-full mt-2">Search</button>
         </form>
       </div>
-      {isModalOpen && <SignInModal onClose={() => setIsModalOpen(false)} onSignIn={handleSignIn} />}
+      {isSignInModalOpen && <SignInModal onClose={() => setIsSignInModalOpen(false)} onSignIn={handleSignIn} />}
+      {isSignUpModalOpen && <SignUpModal onClose={() => setIsSignUpModalOpen(false)} onSignUp={handleSignUp} />} {/* Add the sign-up modal */}
     </header>
   );
 }
+
 
 

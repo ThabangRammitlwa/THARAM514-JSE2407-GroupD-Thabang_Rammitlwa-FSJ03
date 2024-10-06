@@ -11,6 +11,7 @@ import Pagination from './components/Pagination';
 import Footer from './components/Footer';
 
 
+
 export default function Home() {
   const router = useRouter();
   const searchParams = useSearchParams();

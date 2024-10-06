@@ -5,7 +5,10 @@ function goBack() {
 }
 
 
-import { useState ,useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import AddReviewForm from './AddReviewForm';
+import { useAuth } from '../useAuth';
+import { auth } from '../firebaseConfig';
 
 
 /**
@@ -31,6 +34,7 @@ import { useState ,useEffect } from 'react';
 export function ProductDetail({ product }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [loading, setLoading] = useState(true);
+  const { user } = useAuth() || {};
 
     useEffect(() => {
         if (product) {
@@ -183,6 +187,14 @@ export function ProductDetail({ product }) {
               </div>
             ) : (
               <p className="text-gray-500">No reviews yet.</p>
+            )}
+                        {user ? ( // Check if user is available before rendering AddReviewForm
+                <div className="mt-6">
+                    <h3 className="text-xl font-bold text-amber-800 mb-4">Add Your Review</h3>
+                    <AddReviewForm productId={product.id} />
+                </div>
+            ) : (
+                <p className="text-gray-600 mt-4">Please log in to add a review.</p>
             )}
           </div>
         </div>
