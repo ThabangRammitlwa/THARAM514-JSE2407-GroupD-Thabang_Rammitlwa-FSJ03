@@ -2,30 +2,43 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useAuth } from '../useAuth';
+import { signIn,signOutUser } from '../authFunction';
+import { FaUser, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
+import SignInModal from './SingnInModal';
 
-/**
- * Header component that displays the navigation bar with links to different pages.
- * 
- * @param {Object} props - The properties object.
- * @param {string} props.currentSearch - The current search term.
- * @param {Function} props.onSearch - Callback function to handle search submission.
- * 
- * @returns {JSX.Element} - The header component containing the website's logo and navigation links.
- */
-export default function Header({
-  currentSearch,
-  onSearch,
-}) {
+export default function Header({ currentSearch = '', onSearch }) {
   const [search, setSearch] = useState(currentSearch);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const user = useAuth();
 
   useEffect(() => {
-    setSearch(currentSearch);
+    if (currentSearch !== undefined) {
+      setSearch(currentSearch);
+    }
   }, [currentSearch]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onSearch(search);
+  };
+
+  const handleSignIn = async (email, password) => {
+    try {
+      await signIn(email, password);
+      setIsModalOpen(false); // Close the modal on successful sign-in
+    } catch (error) {
+      console.error("Sign-in error:", error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
   };
 
   return (
@@ -52,6 +65,22 @@ export default function Header({
             {/* Add more navigation links here */}
           </ul>
         </nav>
+        <div className="flex items-center space-x-4">
+          {user ? (
+            <>
+              <FaUser className="text-white text-2xl" />
+              <button onClick={handleSignOut} className="text-white flex items-center space-x-1">
+                <FaSignOutAlt />
+                <span>Sign Out</span>
+              </button>
+            </>
+          ) : (
+            <button onClick={() => setIsModalOpen(true)} className="text-white flex items-center space-x-1">
+              <FaSignInAlt />
+              <span>Sign In</span>
+            </button>
+          )}
+        </div>
         <form onSubmit={handleSearchSubmit} className="hidden sm:block">
           <input
             type="text"
@@ -75,6 +104,9 @@ export default function Header({
           <button type="submit" className="bg-amber-600 text-white p-2 rounded w-full mt-2">Search</button>
         </form>
       </div>
+      {isModalOpen && <SignInModal onClose={() => setIsModalOpen(false)} onSignIn={handleSignIn} />}
     </header>
   );
 }
+
+
