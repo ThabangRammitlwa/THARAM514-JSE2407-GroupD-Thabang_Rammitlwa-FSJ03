@@ -36,19 +36,20 @@ export default function Filter({
             ))}
           </select>
           <select
-            value={`${currentSortBy}-${currentSortOrder}`}
-            onChange={(e) => {
-              const [sortBy, sortOrder] = e.target.value.split('-');
-              onSort(sortBy, sortOrder);
-            }}
-            className="p-2 border rounded"
-          >
-            <option value="">Price: Default</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="title-asc">Title: A-Z</option>
-            <option value="title-desc">Title: Z-A</option>
-          </select>
+  value={`${currentSortBy}-${currentSortOrder}`}
+  onChange={(e) => {
+    const [sortBy, sortOrder] = e.target.value.split('-');
+    onSort(sortBy, sortOrder);
+  }}
+  className="p-2 border rounded"
+>
+  <option value="">Default Sorting</option>
+  <option value="price-asc">Price: Low to High</option>
+  <option value="price-desc">Price: High to Low</option>
+  <option value="title-asc">Title: A-Z</option>
+  <option value="title-desc">Title: Z-A</option>
+  <option value="rating-desc">Highest Rated</option>
+</select>
           <button onClick={onReset} className="bg-amber-100 p-2 rounded">Reset All</button>
         </div>
     );

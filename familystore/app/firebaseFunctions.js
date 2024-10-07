@@ -1,24 +1,55 @@
 import { db } from './firebaseConfig';
-import { collection, query, getDocs, doc, getDoc, orderBy, limit, startAfter } from 'firebase/firestore';
+import { collection, query, getDocs, where, orderBy, limit, startAfter } from 'firebase/firestore';
 
-// Fetch paginated products
-export async function fetchProducts(page = 1, limitValue = 20, cursor = null) {
+export async function fetchProducts({ page = 1, search = '', category = '', sortBy = '', sortOrder = '', limitValue = 20 }) {
   const productsRef = collection(db, 'products');
-  let q;
+  let q = query(productsRef);
 
-  if (cursor) {
-    q = query(productsRef, orderBy('title'), startAfter(cursor), limit(limitValue));
+  // Apply category filter
+  if (category) {
+    q = query(q, where('category', '==', category));
+  }
+
+  // Apply search filter
+  if (search) {
+    q = query(q, where('title', '>=', search), where('title', '<=', search + '\uf8ff'));
+  }
+
+  // Apply sorting
+  if (sortBy) {
+    q = query(q, orderBy(sortBy, sortOrder));
   } else {
-    q = query(productsRef, orderBy('title'), limit(limitValue));
+    q = query(q, orderBy('title'));
+  }
+
+  // Apply pagination
+  q = query(q, limit(limitValue));
+  if (page > 1) {
+    const lastVisibleSnapshot = await getLastVisibleDoc(q, (page - 1) * limitValue);
+    if (lastVisibleSnapshot) {
+      q = query(q, startAfter(lastVisibleSnapshot));
+    }
   }
 
   const querySnapshot = await getDocs(q);
   const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+  const totalQuery = query(productsRef);
+  const totalSnapshot = await getDocs(totalQuery);
+  const totalProducts = totalSnapshot.size;
+  const totalPages = Math.ceil(totalProducts / limitValue);
+
   return {
     products,
-    lastVisible: querySnapshot.docs[querySnapshot.docs.length - 1]
+    totalPages,
+    totalProducts
   };
+}
+
+async function getLastVisibleDoc(q, skip) {
+  const skipQuery = query(q, limit(skip));
+  const skipSnapshot = await getDocs(skipQuery);
+  return skipSnapshot.docs[skipSnapshot.docs.length - 1];
 }
 
 // Fetch a single product by ID

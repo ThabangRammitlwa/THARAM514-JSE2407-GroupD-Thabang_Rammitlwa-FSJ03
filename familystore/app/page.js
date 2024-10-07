@@ -2,15 +2,13 @@
 "use client"
 
 import { useEffect, useState } from 'react';
-import { fetchProducts,fetchCategories } from './firebaseFunctions';
+import { fetchProducts, fetchCategories } from './firebaseFunctions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from './components/Header';
 import Filter from './components/Filter';
 import ProductCard from './components/ProductCard';
 import Pagination from './components/Pagination';
 import Footer from './components/Footer';
-
-
 
 export default function Home() {
   const router = useRouter();
@@ -50,13 +48,8 @@ export default function Home() {
       }
     }
     loadData();
-  }, [category, page, sortBy, sortOrder, search]);
+  }, [page, search, category, sortBy, sortOrder]);
 
-  /**
-   * Updates the URL with new search parameters and navigates to the new URL.
-   * 
-   * @param {Object} newParams - The new parameters to update in the URL.
-   */
   const updateUrl = (newParams) => {
     const updatedSearchParams = new URLSearchParams(searchParams);
     Object.entries(newParams).forEach(([key, value]) => {
@@ -69,39 +62,13 @@ export default function Home() {
     router.push(`/?${updatedSearchParams.toString()}`);
   };
 
-  /**
-   * Handles filtering of products based on the selected category.
-   * 
-   * @param {string} newCategory - The new category to filter products by.
-   */
   const handleFilter = (newCategory) => updateUrl({ category: newCategory, page: 1 });
-
-  /**
-   * Handles sorting of products based on selected sorting options.
-   * 
-   * @param {string} newSortBy - The field to sort by.
-   * @param {string} newSortOrder - The order of sorting ('asc' or 'desc').
-   */
   const handleSort = (newSortBy, newSortOrder) => updateUrl({ sortBy: newSortBy, sortOrder: newSortOrder, page: 1 });
-
-  /**
-   * Handles searching for products based on user input.
-   * 
-   * @param {string} newSearch - The new search query.
-   */
   const handleSearch = (newSearch) => updateUrl({ search: newSearch, page: 1 });
-
-  /**
-   * Handles page changes for pagination.
-   * 
-   * @param {number} newPage - The new page number to navigate to.
-   */
   const handlePageChange = (newPage) => updateUrl({ page: newPage });
-
-  /**
-   * Resets all filters and navigates back to the default home page.
-   */
   const handleReset = () => router.push('/');
+
+  // ... (rest of the component remains the same)
 
   if (error) {
     return <div className="text-red-600 text-center p-4 bg-red-100 rounded-lg">Error: {error}</div>;

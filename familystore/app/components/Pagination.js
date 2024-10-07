@@ -11,7 +11,7 @@ import Link from 'next/link';
  * 
  * @returns {JSX.Element} The rendered Pagination component.
  */
-export default function Pagination({ currentPage, totalPages, hasMore, onPageChange }) {
+export default function Pagination({ currentPage, totalPages, onPageChange }) {
   return (
     <div className="flex justify-center items-center space-x-4 my-12">
       {currentPage > 1 && (
@@ -22,8 +22,8 @@ export default function Pagination({ currentPage, totalPages, hasMore, onPageCha
           ← Previous
         </button>
       )}
-      <span className="text-gray-700 font-semibold">Page {currentPage}</span>
-      {hasMore && (
+      <span className="text-gray-700 font-semibold">Page {currentPage} of {totalPages}</span>
+      {currentPage < totalPages && (
         <button
           onClick={() => onPageChange(currentPage + 1)}
           className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300"
