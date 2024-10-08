@@ -1,7 +1,22 @@
 import { db } from './firebaseConfig';
-import { collection, query, getDocs, where, orderBy, limit, startAfter } from 'firebase/firestore';
+import {doc ,collection, query, getDocs,getDoc, where, orderBy, limit, startAfter } from 'firebase/firestore';
 
-export async function fetchProducts({ page = 1, search = '', category = '', sortBy = '', sortOrder = '', limitValue = 20 }) {
+export async function fetchProducts({
+  page = 1,
+  search = '',
+  category = '',
+  sortBy = '',
+  sortOrder = '',
+  limitValue = 20
+}) {
+
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+    sortBy,
+    sortOrder,
+  });
+
   const productsRef = collection(db, 'products');
   let q = query(productsRef);
 

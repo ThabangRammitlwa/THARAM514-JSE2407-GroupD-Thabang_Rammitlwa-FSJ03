@@ -107,7 +107,7 @@ export default function Home() {
         <>
           <ProductCard products={products} />
           <Pagination
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
            hasMore={products}
             onPageChange={handlePageChange}
