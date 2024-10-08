@@ -4,9 +4,9 @@ function goBack() {
   window.history.back();
 }
 
-
-import { useState, useEffect } from 'react';
-import AddReviewForm from './AddReviewForm';
+import Image from 'next/image';
+import { useState, useEffect } from 'react'
+import AddReviewForm from './ReviewForm';
 import { useAuth } from '../useAuth';
 import { auth } from '../firebaseConfig';
 
@@ -124,12 +124,15 @@ export function ProductDetail({ product }) {
               )}
               <div className="flex justify-center mt-4 space-x-2">
                 {product.images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    className={`h-16 w-16 object-cover cursor-pointer ${currentImageIndex === index ? 'border-2 border-amber-600' : 'border'}`}
-                    onClick={() => handleImageClick(index)}
-                  />
+                          <Image
+                          src={image}
+                          alt={`Product image ${index + 1}`}
+                          width={64} // 16 * 4 (to match h-16 w-16)
+                          height={64} // 16 * 4 (to match h-16 w-16)
+                          className={`object-cover cursor-pointer ${currentImageIndex === index ? 'border-2 border-amber-600' : 'border'}`}
+                          onClick={() => handleImageClick(index)}
+                          priority={index === 0} // Optionally prioritize the first image
+                        />
                 ))}
               </div>
             </div>

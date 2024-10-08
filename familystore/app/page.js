@@ -20,6 +20,7 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [lastVisible, setLastVisible] = useState(null)
 
   const page = Number(searchParams.get('page')) || 1;
   const search = searchParams.get('search') || '';
@@ -32,13 +33,14 @@ export default function Home() {
       try {
         setLoading(true);
         const [productsData, categoriesData] = await Promise.all([
-          fetchProducts({ page, search, category, sortBy, sortOrder }),
+          fetchProducts({ page, search, category, sortBy, sortOrder,lastVisible }),
           fetchCategories()
         ]);
         setProducts(productsData.products);
         setTotalPages(productsData.totalPages);
         setCurrentPage(page);
         setTotalProducts(productsData.totalProducts);
+        setLastVisible(productsData.lastVisible);
         setCategories(categoriesData);
         setError(null);
       } catch (e) {
@@ -48,7 +50,7 @@ export default function Home() {
       }
     }
     loadData();
-  }, [page, search, category, sortBy, sortOrder]);
+  }, [page, search, category, sortBy, sortOrder,lastVisible]);
 
   const updateUrl = (newParams) => {
     const updatedSearchParams = new URLSearchParams(searchParams);
@@ -65,7 +67,20 @@ export default function Home() {
   const handleFilter = (newCategory) => updateUrl({ category: newCategory, page: 1 });
   const handleSort = (newSortBy, newSortOrder) => updateUrl({ sortBy: newSortBy, sortOrder: newSortOrder, page: 1 });
   const handleSearch = (newSearch) => updateUrl({ search: newSearch, page: 1 });
-  const handlePageChange = (newPage) => updateUrl({ page: newPage });
+  const handlePageChange = (newPage) => {
+    if (newPage > currentPage) {
+      // Load next set of products when navigating to the next page
+      fetchProducts({ page: newPage, search, category, sortBy, sortOrder, lastVisible }).then(({ products: newProducts, lastVisible: newLastVisible }) => {
+        setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+        setLastVisible(newLastVisible);
+        setCurrentPage(newPage);
+      }).catch(e => setError(e.message));
+    } else {
+      updateUrl({ page: newPage });
+    }
+  };
+
+  
   const handleReset = () => router.push('/');
 
   // ... (rest of the component remains the same)

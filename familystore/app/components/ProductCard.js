@@ -20,7 +20,7 @@ import Image from 'next/image';
  */
  
 
-export default function ProductCard({ products,currentPage }) {
+export default function ProductCard({ products }) {
   const [loading, setLoading] = useState(true);
   const [currentImages, setCurrentImages] = useState({});
 
