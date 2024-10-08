@@ -1,4 +1,4 @@
-// pages/api/products/[id].js
+
 import { fetchProductById } from '../../../firebaseFunctions';
 
 export default async function handler(req, res) {

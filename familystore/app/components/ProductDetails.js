@@ -6,7 +6,6 @@ function goBack() {
 
 import Image from 'next/image';
 import { useState, useEffect } from 'react'
-//import AddReviewForm from './ReviewForm';
 import Reviews from './Reviews';
 import { useAuth } from '../useAuth';
 import { auth } from '../firebaseConfig';
@@ -33,6 +32,7 @@ import { auth } from '../firebaseConfig';
  */
 
 export function ProductDetail({ product }) {
+  const [reviews, setReviews] = useState(product.reviews || [])
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [reviewSort, setReviewSort] = useState('date-desc')
@@ -105,6 +105,24 @@ export function ProductDetail({ product }) {
         return 0;
     }
   });
+
+  const handleReviewAdded = (newReview) => {
+    setReviews((prevReviews) => [...prevReviews, newReview]);
+  };
+
+  const handleReviewUpdated = (updatedReview) => {
+    setReviews((prevReviews) =>
+      prevReviews.map((review) =>
+        review.id === updatedReview.id ? updatedReview : review
+      )
+    );
+  };
+
+  const handleReviewDeleted = (deletedReviewId) => {
+    setReviews((prevReviews) =>
+      prevReviews.filter((review) => review.id !== deletedReviewId)
+    );
+  };
   
   return (
     <div className="py-12">
@@ -203,7 +221,13 @@ export function ProductDetail({ product }) {
             <option value="rating-asc">Lowest Rating First</option>
           </select>
         </div>
-        <Reviews reviews={sortedReviews} />
+        <Reviews
+          reviews={sortedReviews}
+         // productId={params.id}
+          onReviewAdded={handleReviewAdded}
+          onReviewUpdated={handleReviewUpdated}
+          onReviewDeleted={handleReviewDeleted}
+        />
       </div>
     </div>
   );
