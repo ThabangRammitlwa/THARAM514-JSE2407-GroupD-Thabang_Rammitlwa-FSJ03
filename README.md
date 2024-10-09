@@ -59,3 +59,6 @@ Welcome to Family Store, an e-commerce web application designed to provide a sea
 
     7.  **Reviews**
    Every Product has reviews to rate the product, as a signed in user you can add your own review of the product, reviews can be sorted by hisghest to lowest rated or new to old reviews.
+
+
+   https://vercel.live/link/tharam-514-jse-2407-grou-git-ea1f9a-thabang-rammitlwas-projects.vercel.app?via=deployment-domains-list&p=1
