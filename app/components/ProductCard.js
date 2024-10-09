@@ -60,7 +60,7 @@ export default function ProductCard({ products }) {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm: py-8 bg-white">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
         {products && products.map((product) => (
           <Link key={product.id} href={`/product/${product.id}?page={currentPage}`}>
             <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-[300px] sm:h-[350px] md:h-[400px]">

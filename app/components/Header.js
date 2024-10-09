@@ -82,7 +82,7 @@ export default function Header({ currentSearch = '', onSearch }) {
   };
 
   return (
-    <header className="bg-gradient-to-r from-amber-800 via-yellow-600 to-brown-400 shadow-lg">
+    <header className="bg-gradient-to-r from-amber-800 via-yellow-600 to-brown-400 shadow-lg ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
         <Link href="/" className="flex items-center group">
           <span className="font-['Brush_Script_MT',_cursive] text-4xl text-white tracking-wider group-hover:text-yellow-300 transition-colors duration-300">
