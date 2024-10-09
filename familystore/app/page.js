@@ -1,8 +1,8 @@
-// pages/index.js
-"use client"
+
+"use client";
 
 import { useEffect, useState } from 'react';
-import { fetchProducts, fetchCategories } from './firebaseFunctions';
+import { fetchProducts, fetchCategories, syncOfflineChanges } from './firebaseFunctions';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from './components/Header';
 import Filter from './components/Filter';
@@ -20,7 +20,9 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [lastVisible, setLastVisible] = useState(null)
+  const [lastVisible, setLastVisible] = useState(null);
+  const [isOffline, setIsOffline] = useState(false);
+  const [newVersionAvailable, setNewVersionAvailable] = useState(false);
 
   const page = Number(searchParams.get('page')) || 1;
   const search = searchParams.get('search') || '';
@@ -33,7 +35,7 @@ export default function Home() {
       try {
         setLoading(true);
         const [productsData, categoriesData] = await Promise.all([
-          fetchProducts({ page, search, category, sortBy, sortOrder,lastVisible }),
+          fetchProducts({ page, search, category, sortBy, sortOrder, lastVisible }),
           fetchCategories()
         ]);
         setProducts(productsData.products);
@@ -48,9 +50,31 @@ export default function Home() {
       } finally {
         setLoading(false);
       }
+    };
+
+    const handleOnline = () => {
+      setIsOffline(false);
+      syncOfflineChanges();
+    };
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Check if a new version is available
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        setNewVersionAvailable(true);
+      });
     }
+
     loadData();
-  }, [page, search, category, sortBy, sortOrder,lastVisible]);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [page, search, category, sortBy, sortOrder, lastVisible]);
 
   const updateUrl = (newParams) => {
     const updatedSearchParams = new URLSearchParams(searchParams);
@@ -80,10 +104,18 @@ export default function Home() {
     }
   };
 
-  
   const handleReset = () => router.push('/');
 
-  // ... (rest of the component remains the same)
+  const handleNewVersionAvailable = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg && reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    }
+    window.location.reload();
+  };
 
   if (error) {
     return <div className="text-red-600 text-center p-4 bg-red-100 rounded-lg">Error: {error}</div>;
@@ -92,6 +124,20 @@ export default function Home() {
   return (
     <div>
       <Header currentSearch={search} onSearch={handleSearch} />
+
+      {isOffline && (
+        <div className="bg-yellow-100 text-yellow-800 p-2 text-center">
+          You are currently offline. Some features may be limited.
+        </div>
+      )}
+      {newVersionAvailable && (
+        <div className="bg-blue-100 text-blue-800 p-2 text-center">
+          A new version is available.{' '}
+          <button onClick={handleNewVersionAvailable} className="underline">
+            Refresh to update
+          </button>
+        </div>
+      )}
       <Filter
         categories={categories}
         currentCategory={category}
@@ -109,7 +155,7 @@ export default function Home() {
           <Pagination
             currentPage={page}
             totalPages={totalPages}
-           hasMore={products}
+            hasMore={products.length < totalProducts}
             onPageChange={handlePageChange}
           />
           <Footer />
@@ -118,6 +164,7 @@ export default function Home() {
     </div>
   );
 }
+
 
 
 

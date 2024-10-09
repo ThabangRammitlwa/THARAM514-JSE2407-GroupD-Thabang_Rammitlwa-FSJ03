@@ -61,7 +61,7 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
       if (response.ok) {
         const updatedReview = await response.json();
         onReviewUpdated(updatedReview);
-        setEditingReview({ id: null, rating: 5, comment: '' }); // Reset after editing
+        setEditingReview({ id: null, rating: 5, comment: '' }); 
         alert('Review updated successfully!');
       } else {
         throw new Error('Failed to update review');
@@ -131,7 +131,7 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
         </div>
         <button
           onClick={handleAddReview}
-          className="bg-indigo-600 text-white py-2 px-4 rounded"
+          className="bg-amber-600 text-white py-2 px-4 rounded"
         >
           Submit Review
         </button>
@@ -144,16 +144,16 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
           className="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-lg"
         >
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-            <span className="font-semibold text-lg text-indigo-700 mb-2 sm:mb-0">
+            <span className="font-semibold text-lg text-amber-700 mb-2 sm:mb-0">
               {review.reviewerName}
             </span>
-            <span className="text-sm text-purple-600">
+            <span className="text-sm text-amber-600">
               {new Date(review.date).toLocaleDateString('en-GB')}
             </span>
           </div>
           <div className="flex items-center mb-4">
             {renderStars(review.rating)}
-            <span className="ml-2 text-purple-700 font-semibold">
+            <span className="ml-2 text-amber-700 font-semibold">
               {review.rating} / 5
             </span>
           </div>
@@ -162,7 +162,7 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
           <div className="flex space-x-4 mt-4">
             <button
               onClick={() => setEditingReview({ id: review.id, rating: review.rating, comment: review.comment })}
-              className="text-indigo-600 hover:underline"
+              className="text-amber-600 hover:underline"
             >
               Edit
             </button>
@@ -202,7 +202,7 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
               </div>
               <button
                 onClick={() => handleEditReview(review.id)}
-                className="bg-indigo-600 text-white py-2 px-4 rounded"
+                className="bg-amber-600 text-white py-2 px-4 rounded"
               >
                 Update Review
               </button>
