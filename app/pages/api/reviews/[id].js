@@ -1,6 +1,12 @@
-
 import { fetchProductById } from '../../../firebaseFunctions';
 
+/**
+ * API route handler for fetching a product by its ID.
+ *
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @returns {Promise<void>} A promise that resolves when the response is sent.
+ */
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { id } = req.query;
@@ -16,6 +22,7 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
 
 
 

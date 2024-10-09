@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { fetchProducts, fetchCategories, syncOfflineChanges } from './firebaseFunctions'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from './components/Header';
@@ -29,37 +29,39 @@ function HomeContent() {
   const sortBy = searchParams.get('sortBy') || '';
   const sortOrder = searchParams.get('sortOrder') || '';
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [productsData, categoriesData] = await Promise.all([
-          fetchProducts({ page, search, category, sortBy, sortOrder, lastVisible }),
-          fetchCategories()
-        ]);
-        setProducts(productsData.products);
-        setTotalPages(productsData.totalPages);
-        setCurrentPage(page);
-        setTotalProducts(productsData.totalProducts);
-        setLastVisible(productsData.lastVisible);
-        setCategories(categoriesData);
-        setError(null);
-      } catch (e) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [productsData, categoriesData] = await Promise.all([
+        fetchProducts({ page, search, category, sortBy, sortOrder, lastVisible }),
+        fetchCategories(),
+      ]);
+      setProducts(productsData.products);
+      setTotalPages(productsData.totalPages);
+      setCurrentPage(page);
+      setTotalProducts(productsData.totalProducts);
+      setLastVisible(productsData.lastVisible);
+      setCategories(categoriesData);
+      setError(null);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, category, sortBy, sortOrder, lastVisible]);
 
+  useEffect(() => {
+    loadData();
+    
     const handleOnline = () => {
       setIsOffline(false);
       syncOfflineChanges();
     };
     const handleOffline = () => setIsOffline(true);
-
+    
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
+    
     // Check if a new version is available
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -67,15 +69,13 @@ function HomeContent() {
       });
     }
 
-    loadData();
-
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [page, search, category, sortBy, sortOrder, lastVisible]);
+  }, [loadData]);
 
-  const updateUrl = (newParams) => {
+  const updateUrl = useCallback((newParams) => {
     const updatedSearchParams = new URLSearchParams(searchParams);
     Object.entries(newParams).forEach(([key, value]) => {
       if (value) {
@@ -85,19 +85,22 @@ function HomeContent() {
       }
     });
     router.push(`/?${updatedSearchParams.toString()}`);
-  };
+  }, [searchParams, router]);
 
   const handleFilter = (newCategory) => updateUrl({ category: newCategory, page: 1 });
   const handleSort = (newSortBy, newSortOrder) => updateUrl({ sortBy: newSortBy, sortOrder: newSortOrder, page: 1 });
   const handleSearch = (newSearch) => updateUrl({ search: newSearch, page: 1 });
+  
   const handlePageChange = (newPage) => {
     if (newPage > currentPage) {
       // Load next set of products when navigating to the next page
-      fetchProducts({ page: newPage, search, category, sortBy, sortOrder, lastVisible }).then(({ products: newProducts, lastVisible: newLastVisible }) => {
-        setProducts((prevProducts) => [...prevProducts, ...newProducts]);
-        setLastVisible(newLastVisible);
-        setCurrentPage(newPage);
-      }).catch(e => setError(e.message));
+      fetchProducts({ page: newPage, search, category, sortBy, sortOrder, lastVisible })
+        .then(({ products: newProducts, lastVisible: newLastVisible }) => {
+          setProducts((prevProducts) => [...prevProducts, ...newProducts]);
+          setLastVisible(newLastVisible);
+          setCurrentPage(newPage);
+        })
+        .catch(e => setError(e.message));
     } else {
       updateUrl({ page: newPage });
     }
@@ -171,6 +174,7 @@ export default function Home() {
     </Suspense>
   );
 }
+
 
 
 

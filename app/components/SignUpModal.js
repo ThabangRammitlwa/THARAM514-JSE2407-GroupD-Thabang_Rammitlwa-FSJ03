@@ -1,12 +1,31 @@
-// SignUpModal.js
+/**
+ * @module SignUpModal
+ * @description A modal component for user sign-up functionality.
+ */
+
 import { useState } from 'react';
 
+/**
+ * @typedef {Object} SignUpModalProps
+ * @property {function} onClose - Function to close the modal
+ * @property {function} onSignUp - Function to handle sign-up process
+ */
+
+/**
+ * SignUpModal component
+ * @param {SignUpModalProps} props - The component props
+ * @returns {JSX.Element} The SignUpModal component
+ */
 const SignUpModal = ({ onClose, onSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  /**
+   * Handles the form submission
+   * @param {Event} e - The form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);

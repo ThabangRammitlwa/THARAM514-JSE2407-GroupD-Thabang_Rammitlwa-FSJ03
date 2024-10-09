@@ -1,11 +1,17 @@
-// components/UserProfile.js
 import { useState, useEffect } from 'react';
 import { authStateListener, signOutUser } from '../authFunctions';
 
+/**
+ * UserProfile component displays the user's profile information
+ * and allows the user to sign out.
+ *
+ * @returns {JSX.Element} The UserProfile component.
+ */
 const UserProfile = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // Listen for changes in the authentication state
     const unsubscribe = authStateListener((user) => {
       setUser(user);
     });
@@ -27,3 +33,4 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+

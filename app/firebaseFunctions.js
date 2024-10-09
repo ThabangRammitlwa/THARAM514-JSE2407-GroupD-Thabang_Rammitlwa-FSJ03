@@ -5,6 +5,11 @@ import { openDB } from 'idb';
 const DB_NAME = 'offlineStore';
 const STORE_NAME = 'products';
 
+/**
+ * Opens or creates an IndexedDB database for offline storage.
+ *
+ * @returns {Promise<IDBDatabase>} The offline database instance.
+ */
 async function getOfflineDb() {
   return openDB(DB_NAME, 1, {
     upgrade(db) {
@@ -13,6 +18,18 @@ async function getOfflineDb() {
   });
 }
 
+/**
+ * Fetches products from Firestore with optional filtering, sorting, and pagination.
+ *
+ * @param {Object} options - Options for fetching products.
+ * @param {number} [options.page=1] - The page number for pagination.
+ * @param {string} [options.search=''] - Search term for product titles.
+ * @param {string} [options.category=''] - Category filter for products.
+ * @param {string} [options.sortBy=''] - Field to sort by.
+ * @param {string} [options.sortOrder=''] - Order of sorting ('asc' or 'desc').
+ * @param {number} [options.limitValue=20] - Number of products per page.
+ * @returns {Promise<Object>} The fetched products, total pages, and total products.
+ */
 export async function fetchProducts({
   page = 1,
   search = '',
@@ -76,12 +93,26 @@ export async function fetchProducts({
   }
 }
 
+/**
+ * Retrieves the last visible document for pagination.
+ *
+ * @param {Query} q - The Firestore query to get documents.
+ * @param {number} skip - The number of documents to skip.
+ * @returns {Promise<DocumentSnapshot>} The last visible document snapshot.
+ */
 async function getLastVisibleDoc(q, skip) {
   const skipQuery = query(q, limit(skip));
   const skipSnapshot = await getDocs(skipQuery);
   return skipSnapshot.docs[skipSnapshot.docs.length - 1];
 }
 
+/**
+ * Fetches a product by its ID from Firestore.
+ *
+ * @param {string} id - The ID of the product to fetch.
+ * @returns {Promise<Object>} The product data.
+ * @throws {Error} If the product is not found.
+ */
 export async function fetchProductById(id) {
   const productRef = doc(db, 'products', id);
   const productSnapshot = await getDoc(productRef);
@@ -93,6 +124,11 @@ export async function fetchProductById(id) {
   return { id: productSnapshot.id, ...productSnapshot.data() };
 }
 
+/**
+ * Fetches unique categories from the products collection.
+ *
+ * @returns {Promise<string[]>} An array of unique categories.
+ */
 export async function fetchCategories() {
   const productsCollection = collection(db, 'products');
   const snapshot = await getDocs(productsCollection);
@@ -105,6 +141,11 @@ export async function fetchCategories() {
   return Array.from(categories);
 }
 
+/**
+ * Synchronizes offline changes from IndexedDB to Firestore.
+ *
+ * @returns {Promise<void>}
+ */
 export async function syncOfflineChanges() {
   const offlineDb = await getOfflineDb();
   const tx = offlineDb.transaction(STORE_NAME, 'readonly');
@@ -119,8 +160,15 @@ export async function syncOfflineChanges() {
   }
 }
 
+/**
+ * Updates a product in Firestore.
+ *
+ * @param {Object} product - The product data to update.
+ * @returns {Promise<void>}
+ */
 async function updateProductInFirebase(product) {
   const productRef = doc(db, 'products', product.id);
   await setDoc(productRef, product, { merge: true });
 }
+
 

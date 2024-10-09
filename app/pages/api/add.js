@@ -1,7 +1,15 @@
 import { verifyIdToken } from '../../middleware/verifyToken';
 import { db } from '../../firebaseConfig';
 
+/**
+ * API route handler for submitting a product review.
+ *
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} res - The HTTP response object.
+ * @returns {Promise<void>} A promise that resolves when the response is sent.
+ */
 export default async function handler(req, res) {
+  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
@@ -19,6 +27,7 @@ export default async function handler(req, res) {
         reviewerName: user.name || 'Anonymous'
       };
 
+      // Add the new review to the database
       const reviewRef = await db.collection('products').doc(productId).collection('reviews').add(newReview);
       
       res.status(201).json({ id: reviewRef.id, ...newReview });

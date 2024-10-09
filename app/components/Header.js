@@ -3,11 +3,19 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../useAuth';
-import { signIn, signOutUser, signUp } from '../authFunction'
+import { signIn, signOutUser, signUp } from '../authFunction';
 import { FaUser, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
-import SignInModal from './SingnInModal'
-import SignUpModal from './SignUpModal' // Import the new SignUpModal component
+import SignInModal from './SingnInModal';
+import SignUpModal from './SignUpModal'; // Import the new SignUpModal component
 
+/**
+ * Header component for the application.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} [props.currentSearch=''] - The initial search term.
+ * @param {function} props.onSearch - Callback function when search is submitted.
+ * @returns {JSX.Element} - Rendered Header component.
+ */
 export default function Header({ currentSearch = '', onSearch }) {
   const [search, setSearch] = useState(currentSearch);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,11 +30,22 @@ export default function Header({ currentSearch = '', onSearch }) {
     }
   }, [currentSearch]);
 
+  /**
+   * Handles the search form submission.
+   *
+   * @param {Event} e - The form submit event.
+   */
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     onSearch(search);
   };
 
+  /**
+   * Handles user sign-in action.
+   *
+   * @param {string} email - The user's email.
+   * @param {string} password - The user's password.
+   */
   const handleSignIn = async (email, password) => {
     try {
       await signIn(email, password);
@@ -36,6 +55,9 @@ export default function Header({ currentSearch = '', onSearch }) {
     }
   };
 
+  /**
+   * Handles user sign-out action.
+   */
   const handleSignOut = async () => {
     try {
       await signOutUser();
@@ -44,6 +66,12 @@ export default function Header({ currentSearch = '', onSearch }) {
     }
   };
 
+  /**
+   * Handles user sign-up action.
+   *
+   * @param {string} email - The user's email.
+   * @param {string} password - The user's password.
+   */
   const handleSignUp = async (email, password) => {
     try {
       await signUp(email, password);
@@ -126,6 +154,7 @@ export default function Header({ currentSearch = '', onSearch }) {
     </header>
   );
 }
+
 
 
 
