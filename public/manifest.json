@@ -1,5 +1,5 @@
 {
-    "name": "familystore",
+    "name": "fstore",
     "short_name": "fs",
     "start_url": "/",
     "display": "standalone",

@@ -1,5 +1,5 @@
-import { verifyIdToken } from '../../../middleware/verifyToken';
-import { db } from '../../../firebaseConfig';
+import { verifyIdToken } from '../../middleware/verifyToken';
+import { db } from '../../firebaseConfig';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {

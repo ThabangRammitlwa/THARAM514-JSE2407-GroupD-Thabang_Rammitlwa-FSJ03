@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../useAuth';
-import { signIn, signOutUser, signUp } from '../authFunction'; // Import signUp function
+import { signIn, signOutUser, signUp } from '../authFunction'
 import { FaUser, FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
 import SignInModal from './SingnInModal'
 import SignUpModal from './SignUpModal' // Import the new SignUpModal component

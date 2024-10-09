@@ -160,6 +160,7 @@ export function ProductDetail({ product }) {
             <div className="flex justify-center mt-4 space-x-2">
               {product.images.map((image, index) => (
                 <Image
+                  key= {index}
                   src={image}
                   alt={`Product image ${index + 1}`}
                   width={64} // 16 * 4 (to match h-16 w-16)
@@ -185,7 +186,7 @@ export function ProductDetail({ product }) {
             <div className="mb-4">
               {product.tags.map((tag, index) => (
                 <span
-                  key={index}
+                  key={tag}
                   className="inline-block bg-amber-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
                 >
                   {tag}
@@ -223,7 +224,7 @@ export function ProductDetail({ product }) {
         </div>
         <Reviews
           reviews={sortedReviews}
-         // productId={params.id}
+         productId={product.id}
           onReviewAdded={handleReviewAdded}
           onReviewUpdated={handleReviewUpdated}
           onReviewDeleted={handleReviewDeleted}

@@ -1,5 +1,5 @@
 // pages/api/protected.js
-import { verifyIdToken } from '../../middleware/verifyToken';
+import { verifyIdToken } from '../../../middleware/verifyToken';
 
 export default async function handler(req, res) {
   await verifyIdToken(req, res, async () => {

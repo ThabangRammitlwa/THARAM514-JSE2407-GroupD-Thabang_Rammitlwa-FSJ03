@@ -1,5 +1,5 @@
-import { ProductDetail } from '../../components/ProductDetails.js';
-import { fetchProductById } from '../../firebaseFunctions';
+import { ProductDetail } from '../../components/ProductDetails'
+import { fetchProductById } from '../../firebaseFunctions'
 
 
 /**
