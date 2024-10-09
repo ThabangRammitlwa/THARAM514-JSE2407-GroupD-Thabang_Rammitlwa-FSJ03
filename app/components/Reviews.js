@@ -1,6 +1,6 @@
 import React, { useState ,useEffect} from 'react';
 import { useAuth } from '../useAuth'
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 /**
  * Reviews component to display customer reviews with a rating and comment.
