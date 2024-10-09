@@ -1,17 +1,32 @@
 // components/SignIn.js
 import { useState } from 'react';
 import { signIn } from '../authFunctions';
+import { useRouter } from 'next/router';
 
+/**
+ * SignIn component for user authentication.
+ * @returns {JSX.Element} SignIn form
+ */
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const router = useRouter();
+  const { redirectTo } = router.query;
 
+  /**
+   * Handles form submission for sign-in.
+   * @param {Event} e - The form submission event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await signIn(email, password);
-      alert('Sign-In Successful');
+      if (redirectTo) {
+        router.push(decodeURIComponent(redirectTo));
+      } else {
+        router.push('/');
+      }
     } catch (e) {
       setError(e.message);
     }

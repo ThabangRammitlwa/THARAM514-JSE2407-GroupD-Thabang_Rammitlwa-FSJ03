@@ -1,8 +1,7 @@
-
 "use client";
 
-import { useEffect, useState } from 'react';
-import { fetchProducts, fetchCategories, syncOfflineChanges } from './firebaseFunctions';
+import { Suspense, useEffect, useState } from 'react';
+import { fetchProducts, fetchCategories, syncOfflineChanges } from './firebaseFunctions'; 
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from './components/Header';
 import Filter from './components/Filter';
@@ -10,7 +9,7 @@ import ProductCard from './components/ProductCard';
 import Pagination from './components/Pagination';
 import Footer from './components/Footer';
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [products, setProducts] = useState([]);
@@ -164,6 +163,15 @@ export default function Home() {
     </div>
   );
 }
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="text-center font-bold text-amber-800 p-8">Loading...</div>}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
 
 
 

@@ -1,16 +1,17 @@
 import React, { useState ,useEffect} from 'react';
 import { useAuth } from '../useAuth'
+import { useRouter } from 'next/router';
 
 /**
  * Reviews component to display customer reviews with a rating and comment.
  *
  * @param {Object} props - The properties passed to the Reviews component.
  * @param {Array} props.reviews - An array of review objects.
- * @param {string} props.reviews[].reviewerName - The name of the reviewer.
- * @param {string} props.reviews[].date - The date when the review was posted.
- * @param {number} props.reviews[].rating - The rating given by the reviewer (from 1 to 5).
- * @param {string} props.reviews[].comment - The review comment text.
- * @returns {JSX.Element} - A component that renders a list of customer reviews.
+ * @param {string} props.productId - The ID of the product being reviewed.
+ * @param {Function} props.onReviewAdded - Callback function when a review is added.
+ * @param {Function} props.onReviewUpdated - Callback function when a review is updated.
+ * @param {Function} props.onReviewDeleted - Callback function when a review is deleted.
+ * @returns {JSX.Element} - A component that renders a list of customer reviews and review management functions.
  */
 export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpdated, onReviewDeleted }) {
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
@@ -18,6 +19,7 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
   const [error, setError] = useState(null);
   const { user } = useAuth() || {};
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (user) {
@@ -27,10 +29,13 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
     }
   }, [user]);
 
-
+  /**
+   * Handles adding a new review.
+   * If the user is not logged in, it redirects to the sign-in page.
+   */
   const handleAddReview = async () => {
     if (!isLoggedIn) {
-      alert('You must be logged in to add a review.');
+      router.push(`/signin?redirectTo=${encodeURIComponent(currentUrl)}`);
       return;
     }
 
@@ -51,30 +56,6 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
         alert('Review added successfully!');
       } else {
         throw new Error('Failed to add review');
-      }
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  const handleEditReview = async (reviewId) => {
-    try {
-      const response = await fetch(`/api/reviews/edit/${reviewId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`
-        },
-        body: JSON.stringify({ ...editingReview, productId })
-      });
-
-      if (response.ok) {
-        const updatedReview = await response.json();
-        onReviewUpdated(updatedReview);
-        setEditingReview({ id: null, rating: 5, comment: '' }); 
-        alert('Review updated successfully!');
-      } else {
-        throw new Error('Failed to update review');
       }
     } catch (error) {
       setError(error.message);
@@ -117,34 +98,40 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold mb-4">Add a Review</h3>
         {error && <p className="text-red-600">{error}</p>}
-        <div className="mb-4">
-          <label className="block mb-2">Rating:</label>
-          <select
-            value={newReview.rating}
-            onChange={(e) => setNewReview({ ...newReview, rating: Number(e.target.value) })}
-            className="border p-2 rounded w-full"
-          >
-            {[1, 2, 3, 4, 5].map((rating) => (
-              <option key={rating} value={rating}>{rating}</option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block mb-2">Comment:</label>
-          <textarea
-            value={newReview.comment}
-            onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-            className="border p-2 rounded w-full"
-            rows="4"
-            placeholder="Write your review..."
-          />
-        </div>
-        <button
-          onClick={handleAddReview}
-          className="bg-amber-600 text-white py-2 px-4 rounded"
-        >
-          Submit Review
-        </button>
+        {isLoggedIn ? (
+          <>
+            <div className="mb-4">
+              <label className="block mb-2">Rating:</label>
+              <select
+                value={newReview.rating}
+                onChange={(e) => setNewReview({ ...newReview, rating: Number(e.target.value) })}
+                className="border p-2 rounded w-full"
+              >
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <option key={rating} value={rating}>{rating}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2">Comment:</label>
+              <textarea
+                value={newReview.comment}
+                onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                className="border p-2 rounded w-full"
+                rows="4"
+                placeholder="Write your review..."
+              />
+            </div>
+            <button
+              onClick={handleAddReview}
+              className="bg-amber-600 text-white py-2 px-4 rounded"
+            >
+              Submit Review
+            </button>
+          </>
+        ) : (
+          <p>Please <button onClick={() => router.push('/signin')} className="text-amber-600 underline">sign in</button> to add a review.</p>
+        )}
       </div>
 
       {/* Displaying Reviews */}

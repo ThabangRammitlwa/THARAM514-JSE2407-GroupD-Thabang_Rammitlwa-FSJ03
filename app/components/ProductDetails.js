@@ -8,7 +8,8 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react'
 import Reviews from './Reviews';
 import { useAuth } from '../useAuth';
-import { auth } from '../firebaseConfig';
+import { usePathname } from 'next/navigation'
+import {auth} from '../firebaseConfig'
 
 
 /**
@@ -32,6 +33,7 @@ import { auth } from '../firebaseConfig';
  */
 
 export function ProductDetail({ product }) {
+  const pathname = usePathname();
   const [reviews, setReviews] = useState(product.reviews || [])
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -224,10 +226,11 @@ export function ProductDetail({ product }) {
         </div>
         <Reviews
           reviews={sortedReviews}
-         productId={product.id}
+          productId={product.id}
           onReviewAdded={handleReviewAdded}
           onReviewUpdated={handleReviewUpdated}
           onReviewDeleted={handleReviewDeleted}
+          currentUrl={pathname}
         />
       </div>
     </div>
