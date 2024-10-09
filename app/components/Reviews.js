@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { useAuth } from '../useAuth'
 
 /**
@@ -17,9 +17,19 @@ export default function Reviews({ reviews, productId, onReviewAdded, onReviewUpd
   const [editingReview, setEditingReview] = useState({ id: null, rating: 5, comment: '' });
   const [error, setError] = useState(null);
   const { user } = useAuth() || {};
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [user]);
+
 
   const handleAddReview = async () => {
-    if (!user) {
+    if (!isLoggedIn) {
       alert('You must be logged in to add a review.');
       return;
     }
